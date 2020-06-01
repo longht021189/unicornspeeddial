@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
+typedef UnicornStateCallback = void Function(bool);
+
 class UnicornOrientation {
   static const HORIZONTAL = 0;
   static const VERTICAL = 1;
 }
 
-class UnicornButton extends FloatingActionButton {
+class UnicornButton extends StatelessWidget {
   final FloatingActionButton currentButton;
   final String labelText;
   final double labelFontSize;
@@ -54,7 +56,6 @@ class UnicornButton extends FloatingActionButton {
                     : this.labelColor)));
   }
 
-
   Widget build(BuildContext context) {
     return this.currentButton;
   }
@@ -74,6 +75,7 @@ class UnicornDialer extends StatefulWidget {
   final Function onMainButtonPressed;
   final Object parentHeroTag;
   final bool hasNotch;
+  final UnicornStateCallback callback;
 
   UnicornDialer(
       {this.parentButton,
@@ -86,9 +88,10 @@ class UnicornDialer extends StatefulWidget {
         this.parentHeroTag = "parent",
         this.finalButtonIcon,
         this.animationDuration = 180,
-		this.mainAnimationDuration = 200,
+		    this.mainAnimationDuration = 200,
         this.childPadding = 4.0,
-        this.hasNotch = false})
+        this.hasNotch = false, 
+        this.callback})
       : assert(parentButton != null);
 
   _UnicornDialer createState() => _UnicornDialer();
@@ -123,8 +126,10 @@ class _UnicornDialer extends State<UnicornDialer>
   void mainActionButtonOnPressed() {
     if (this._animationController.isDismissed) {
       this._animationController.forward();
+      this.widget.callback(true);
     } else {
       this._animationController.reverse();
+      this.widget.callback(false);
     }
   }
 
@@ -219,7 +224,7 @@ class _UnicornDialer extends State<UnicornDialer>
               this._animationController.reverse();
             },
             child: widget.childButtons[index].currentButton.child,
-            heroTag: widget.childButtons[index].currentButton.heroTag,
+            heroTag: widget.childButtons[index].currentButton.heroTag ?? "UnicornButton_$index",
             backgroundColor:
             widget.childButtons[index].currentButton.backgroundColor,
             mini: widget.childButtons[index].currentButton.mini,
